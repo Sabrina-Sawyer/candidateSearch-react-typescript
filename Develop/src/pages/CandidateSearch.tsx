@@ -19,4 +19,7 @@ const [currentCandidate, setCurrentCandidate] = useState<Candidate>({
   return <h1>CandidateSearch</h1>;
 };
 
+// searchGithub user searchs for a single user
+// 
+
 export default CandidateSearch;
