@@ -2,7 +2,7 @@
 interface Candidate {
     login: string | null;
     name: string | null;
-    id: number;
+    id: string | null;
     location: string | null;
     img: string | null;
     email: string | null;

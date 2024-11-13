@@ -4,7 +4,7 @@ import './index.css';
 
 import App from './App.tsx';
 import CandidateSearch from './pages/CandidateSearch.tsx';
-import SavedCandidates from './pages/SavedCandidates.tsx';
+// import SavedCandidates from './pages/SavedCandidates.tsx';
 import ErrorPage from './pages/ErrorPage.tsx';
 
 const router = createBrowserRouter([
@@ -17,10 +17,10 @@ const router = createBrowserRouter([
         index: true,
         element: <CandidateSearch />,
       },
-      {
-        path: '/SavedCandidates',
-        element: <SavedCandidates />,
-      },
+      // {
+      //   path: '/SavedCandidates',
+      //   element: <SavedCandidates />,
+      // },
     ],
   },
 ]);

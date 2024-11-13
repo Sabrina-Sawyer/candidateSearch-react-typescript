@@ -1,6 +1,6 @@
 import type React from 'react';
 import Card from 'react-bootstrap/Card';
-import type { Candidate } from '../interfaces/Candidate.interface';
+import type Candidate from '../interfaces/Candidate.interface';
 
 
 
@@ -19,9 +19,9 @@ type CandidateCardProps = {
 
 const CandidateCard = ({
     currentCandidate,
-    addToSavedCandidate,
-    onSavedCandidate,
-    removeFromStorage,
+    // addToSavedCandidate,
+    // onSavedCandidate,
+    // removeFromStorage,
 }: CandidateCardProps) => {
     return (
         <Card style={{ width: '18rem' }}>
