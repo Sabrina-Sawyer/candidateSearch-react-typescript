@@ -1,20 +1,38 @@
 import { useState, useEffect } from 'react';
-import { searchGithub } from '../api/API';
+import { searchGithub, searchGithubUser } from '../api/API';
 import Candidate from '../interfaces/Candidate.interface';
+// import Card from 'react-bootstrap/Card';
 // import CandidateCard from '../components/CandidateCards';
 
 
 const CandidateSearch = () => {
   const [candidateData, setCandidateData] = useState<Candidate[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [detailedData, setDetailedData] = useState<Candidate[]>([]);
   useEffect(() => {
     searchGithub().then((data) => {
-      console.log(data);
+      // console.log(data);
       setCandidateData(data);
-      console.log(candidateData);
+      getGitHubDetails();
+      async function getGitHubDetails() {
+        const detailedCandidates = await Promise.all(candidateData.map((candidate) => getDetails(candidate.login)));
+        console.log(detailedCandidates);
+        setDetailedData(detailedCandidates);
+        console.log(detailedData);
+      }
     });
   }, []);
 
+
+  async function getDetails(username: string) {
+    const response = await searchGithubUser(username);
+    if (!response) {
+      return 'no data found for this user';
+    }
+    const data = await response.json();
+    return data;
+  }
+  
 
 
 
@@ -48,7 +66,25 @@ const CandidateSearch = () => {
       (
         <div>
           {candidateData[currentIndex].login}
-          <button
+        {/* <Card style={{ width: '18rem' }}>
+            <Card.Img variant="top" src={`${candidateData[currentIndex].img}`} alt={`${candidateData[currentIndex].name}`} />
+            <Card.Body>
+                <Card.Title>{candidateData[currentIndex].name}</Card.Title>
+                <Card.Text>
+                    Location: {candidateData[currentIndex].location}
+                </Card.Text>
+                <Card.Text>
+                    Email: {candidateData[currentIndex].email}
+                </Card.Text>
+                <Card.Text>
+                    Company: {candidateData[currentIndex].company}
+                </Card.Text>
+                <Card.Text>
+                    Bio: {candidateData[currentIndex].bio}
+                </Card.Text>
+            </Card.Body>
+        </Card> */}
+        <button
         onClick={handleNext}>
           Next
         </button>
