@@ -11,14 +11,13 @@ const CandidateSearch = () => {
   const [detailedData, setDetailedData] = useState<Candidate[]>([]);
   useEffect(() => {
     searchGithub().then((data) => {
-      // console.log(data);
+      //console.log("the things", data);
       setCandidateData(data);
-      getGitHubDetails();
-      async function getGitHubDetails() {
-        const detailedCandidates = await Promise.all(candidateData.map((candidate) => getDetails(candidate.login)));
-        console.log(detailedCandidates);
-        setDetailedData(detailedCandidates);
-        console.log(detailedData);
+      getGitHubDetails(candidateData);
+      async function getGitHubDetails(candidates: Candidate[]) {
+        await Promise.all(candidates.map((candidate) => getDetails(candidate.login)));
+        //setDetailedData(detailedCandidates);
+        console.log('detailedData', detailedData);
       }
     });
   }, []);
@@ -26,11 +25,14 @@ const CandidateSearch = () => {
 
   async function getDetails(username: string) {
     const response = await searchGithubUser(username);
+    //console.log('response bro: ', response);
     if (!response) {
       return 'no data found for this user';
     }
     const data = await response.json();
-    return data;
+    // return data;
+    setDetailedData((prev) => [...prev, ...data]);
+
   }
   
 
