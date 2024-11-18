@@ -1,102 +1,77 @@
 import { useState, useEffect } from 'react';
 import { searchGithub, searchGithubUser } from '../api/API';
 import Candidate from '../interfaces/Candidate.interface';
-// import Card from 'react-bootstrap/Card';
-// import CandidateCard from '../components/CandidateCards';
-
+import Card from 'react-bootstrap/Card';
 
 const CandidateSearch = () => {
   const [candidateData, setCandidateData] = useState<Candidate[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const [detailedData, setDetailedData] = useState<Candidate[]>([]);
+  const [currentCandidate, setCurrentCandidate] = useState<Candidate | null>(null);
+
   useEffect(() => {
-    searchGithub().then((data) => {
-      //console.log("the things", data);
-      setCandidateData(data);
-      getGitHubDetails(candidateData);
-      async function getGitHubDetails(candidates: Candidate[]) {
-        await Promise.all(candidates.map((candidate) => getDetails(candidate.login)));
-        //setDetailedData(detailedCandidates);
-        console.log('detailedData', detailedData);
-      }
-    });
+    const getInitialData = async () => {
+      const ghData = await searchGithub();
+      setCandidateData(ghData);
+    };
+    getInitialData();
   }, []);
 
-
-  async function getDetails(username: string) {
-    const response = await searchGithubUser(username);
-    //console.log('response bro: ', response);
-    if (!response) {
-      return 'no data found for this user';
-    }
-    const data = await response.json();
-    // return data;
-    setDetailedData((prev) => [...prev, ...data]);
-
-  }
-  
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      if (candidateData.length > 0) {
+        const userDeets = await searchGithubUser(candidateData[currentIndex].login);
+        setCurrentCandidate(userDeets);
+      }
+    };
+    fetchUserDetails();
+  }, [currentIndex, candidateData]);
 
 
 
-  // const [currentCandidate, setCurrentCandidate] = useState({});
+  const handleNext = () => {
+    const nextIndex = (currentIndex + 1) % candidateData.length; // Loop back to start if at the end
+    setCurrentIndex(nextIndex);
+  };
 
-  // const [searchInput, setSearchInput] = useState<string>('');
-
-  // const addToSaveCandidate = () => {
-  //   let parsedSaveCandidate: Candidate[] = [];
-  //   const storedSaveCandidate = localStorage.getItem('saveCandidate');
-  //   if (typeof storedSaveCandidate === 'string') {
-  //     parsedSaveCandidate = JSON.parse(storedSaveCandidate);
-  //   }
-  //   parsedSaveCandidate.push(currentCandidate);
-  //   localStorage.setItem('saveCandidate', JSON.stringify(parsedSaveCandidate));
-  // };
-
-  function handleNext() {
-    setCurrentIndex((prev) => prev + 1);
-
-
+  const handleSave = (candidate: Candidate) => {
+    const storedCands = JSON.parse(localStorage.getItem('savedCandidates') || '[]');
+    storedCands.push(candidate);
+    localStorage.setItem('savedCandidates', JSON.stringify(storedCands));
+    const nextIndex = (currentIndex + 1) % candidateData.length;
+    setCurrentIndex(nextIndex);
   }
 
-
-
-
-
-  return (<>
-    <h1>CandidateSearch</h1>
-    {candidateData.length > 0 && candidateData[currentIndex] ?
-      (
-        <div>
-          {candidateData[currentIndex].login}
-        {/* <Card style={{ width: '18rem' }}>
-            <Card.Img variant="top" src={`${candidateData[currentIndex].img}`} alt={`${candidateData[currentIndex].name}`} />
-            <Card.Body>
-                <Card.Title>{candidateData[currentIndex].name}</Card.Title>
-                <Card.Text>
-                    Location: {candidateData[currentIndex].location}
-                </Card.Text>
-                <Card.Text>
-                    Email: {candidateData[currentIndex].email}
-                </Card.Text>
-                <Card.Text>
-                    Company: {candidateData[currentIndex].company}
-                </Card.Text>
-                <Card.Text>
-                    Bio: {candidateData[currentIndex].bio}
-                </Card.Text>
-            </Card.Body>
-        </Card> */}
-        <button
-        onClick={handleNext}>
-          Next
-        </button>
-        </div>
+  return (
+    <>
+      <h1>CandidateSearch</h1>
+      {currentCandidate ? (
+        <>
+          <div className='card-container'>
+            <Card>
+              <Card.Img
+                variant="top"
+                src={currentCandidate.avatar_url}
+                alt={currentCandidate.id}
+              />
+              <Card.Body>
+                <Card.Title>{currentCandidate.login}</Card.Title>
+                <Card.Text>Location: {currentCandidate.location}</Card.Text>
+                <Card.Text>Email: {currentCandidate.email}</Card.Text>
+                <Card.Text>Company: {currentCandidate.company}</Card.Text>
+                <Card.Text>Bio: {currentCandidate.bio}</Card.Text>
+              </Card.Body>
+            </Card>
+          </div>
+          <div>
+            <button onClick={handleNext}>Next</button>
+            <button onClick={() => handleSave(currentCandidate)}>Save Candidate</button>
+          </div>
+        </>
       ) : (
-        <div>
-          No candidate data
-        </div>
+        <div>No candidate data</div>
       )}
-  </>);
+    </>
+  );
 };
 
 export default CandidateSearch;
